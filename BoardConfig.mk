@@ -20,10 +20,13 @@ TARGET_BOARD_PLATFORM := msm8974
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
 TARGET_CPU_VARIANT := krait
-TARGET_CPU_SMP := true
 TARGET_GLOBAL_CFLAGS += -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mfpu=neon -mfloat-abi=softfp
+
 TARGET_NO_RADIOIMAGE := true
+TARGET_NO_BOOTLOADER := true
+TARGET_NO_RECOVERY := false
+TARGET_NO_KERNEL := false
 
 BOARD_KERNEL_BASE        := 0x00000000
 BOARD_KERNEL_PAGESIZE    := 2048
@@ -31,15 +34,15 @@ BOARD_KERNEL_TAGS_OFFSET := 0x01E00000
 BOARD_RAMDISK_OFFSET     := 0x02000000
 
 BOARD_KERNEL_BOOTIMG := true
-TARGET_NO_SEPARATE_RECOVERY := true
-BOARD_CUSTOM_BOOTIMG := true
-BOARD_KERNEL_SEPARATED_DT := true
-TARGET_DTB_EXTRA_FLAGS := --force-v2
-BOARD_CUSTOM_BOOTIMG_MK := device/sony/shinano-common/boot/custombootimg.mk
-BOARD_MKBOOTIMG_ARGS  := --ramdisk_offset 0x02000000 --tags_offset 0x01E00000
+#BOARD_CUSTOM_MKBOOTIMG := mkqcdtbootimg
+BOARD_MKBOOTIMG_ARGS := --ramdisk_offset $(BOARD_RAMDISK_OFFSET) --tags_offset $(BOARD_KERNEL_TAGS_OFFSET)
+#BOARD_MKBOOTIMG_ARGS += --dt_dir $(OUT)/dtbs
 
-BOARD_KERNEL_CMDLINE := console=ttyHSL0,115200,n8 androidboot.hardware=shinano user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3 selinux=0
+BOARD_KERNEL_CMDLINE := androidboot.hardware=shinano androidboot.selinux=permissive
+BOARD_KERNEL_CMDLINE += user_debug=31 msm_rtb.filter=0x37 ehci-hcd.park=3
 BOARD_KERNEL_CMDLINE += dwc3.maximum_speed=high dwc3_msm.prop_chg_detect=Y
+BOARD_KERNEL_CMDLINE += console=ttyHSL0,115200,n8
+BOARD_KERNEL_CMDLINE += coherent_pool=8M vmalloc=400M
 
 TARGET_USERIMAGES_USE_EXT4 := true
 BOARD_CACHEIMAGE_FILE_SYSTEM_TYPE := ext4
@@ -47,17 +50,27 @@ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 2671771648
 BOARD_CACHEIMAGE_PARTITION_SIZE := 209715200
 BOARD_FLASH_BLOCK_SIZE := 131072 # (BOARD_KERNEL_PAGESIZE * 64)
 
+TARGET_RECOVERY_FSTAB = device/sony/shinano-common/rootdir/fstab.shinano
+
+# GFX
 USE_OPENGL_RENDERER := true
+TARGET_USES_ION := true
+TARGET_USES_OVERLAY := true
+TARGET_USES_SF_BYPASS := true
 TARGET_USES_C2D_COMPOSITION := true
+
 MAX_EGL_CACHE_KEY_SIZE := 12*1024
 MAX_EGL_CACHE_SIZE := 2048*1024
 OVERRIDE_RS_DRIVER := libRSDriver_adreno.so
-BOARD_EGL_CFG := device/sony/shinano-common/rootdir/system/lib/egl/egl.cfg
+NUM_FRAMEBUFFER_SURFACE_BUFFERS := 3
 
+# Audio
 BOARD_USES_ALSA_AUDIO := true
+AUDIO_FEATURE_ENABLED_MULTI_VOICE_SESSIONS := true
 
-TARGET_USES_ION := true
+# Camera
 USE_DEVICE_SPECIFIC_CAMERA := true
+BOARD_QTI_CAMERA_32BIT_ONLY := true
 
 # Wi-Fi definitions for Broadcom solution
 BOARD_WLAN_DEVICE           := bcmdhd
@@ -92,49 +105,32 @@ BOARD_NFC_CHIPSET := pn547
 EXTENDED_FONT_FOOTPRINT := true
 
 # Enable dex-preoptimization to speed up first boot sequence
-WITH_DEXPREOPT := true
+ifeq ($(HOST_OS),linux)
+    WITH_DEXPREOPT ?= true
+endif
 
-# Recovery
-TARGET_RECOVERY_FSTAB := device/sony/shinano-common/rootdir/fstab.shinano
-TARGET_RECOVERY_PIXEL_FORMAT := "RGB_565"
-BOARD_HAS_NO_SELECT_BUTTON := true
-BOARD_USE_CUSTOM_RECOVERY_FONT := \"roboto_23x41.h\"
+BUILD_KERNEL := true
+-include vendor/sony/kernel/KernelConfig.mk
 
-# TWRP flags
-TW_THEME := portrait_hdpi
-RECOVERY_GRAPHICS_USE_LINELENGTH := true
-RECOVERY_SDCARD_ON_DATA := true
-TW_HAS_NO_RECOVERY_PARTITION := true
-TW_FLASH_FROM_STORAGE := true
-TW_EXTERNAL_STORAGE_PATH := "/external_sd"
-TW_EXTERNAL_STORAGE_MOUNT_POINT := "external_sd"
-TW_DEFAULT_EXTERNAL_STORAGE := true
-# TW_INCLUDE_CRYPTO := true
-TW_INCLUDE_JB_CRYPTO := true
-TW_CRYPTO_FS_TYPE := "ext4"
-TW_CRYPTO_REAL_BLKDEV := "/dev/block/platform/msm_sdcc.1/by-name/userdata"
-TW_CRYPTO_MNT_POINT := "/data"
-TW_CRYPTO_FS_OPTIONS := "nosuid,nodev,barrier=1,noauto_da_alloc,discard"
-TW_CRYPTO_FS_FLAGS := "0x00000406"
-TW_CRYPTO_KEY_LOC := "footer"
-TW_INCLUDE_FUSE_EXFAT := true
-# TW_BOARD_CUSTOM_GRAPHICS := ../../../device/sony/shinano-common/recovery/twrpgraphics.c
-TW_BRIGHTNESS_PATH := /sys/class/leds/wled:backlight/brightness
-TW_MAX_BRIGHTNESS := 4095
-TW_NO_USB_STORAGE := true
-TW_NO_SCREEN_BLANK := true
-TARGET_USERIMAGES_USE_F2FS := true
+# SELinux
+include device/qcom/sepolicy/sepolicy.mk
 
-# Releasetools
-TARGET_RELEASETOOLS_EXTENSIONS := device/sony/shinano-common
+BOARD_SEPOLICY_DIRS += \
+    device/sony/shinano-common/sepolicy
 
-#MultiROM config. MultiROM also uses parts of TWRP config
-MR_INPUT_TYPE := type_b
-MR_INIT_DEVICES := device/sony/shinano-common/multirom/init_devices.c
-MR_USE_QCOM_OVERLAY := true
-MR_QCOM_OVERLAY_HEADER := device/sony/shinano-common/multirom/framebuffer_qcom_overlay.h
-MR_KEXEC_DTB := true
-MR_FSTAB := device/sony/shinano-common/multirom/twrp.fstab
-MR_USE_MROM_FSTAB := true
-MR_QCOM_OVERLAY_CUSTOM_PIXEL_FORMAT := MDP_RGBX_8888
-MR_PIXEL_FORMAT := "RGBX_8888"
+BOARD_SEPOLICY_UNION += \
+    addrsetup.te \
+    device.te \
+    file.te \
+    property.te \
+    sct.te \
+    sensors.te \
+    service.te \
+    system_app.te \
+    tad.te \
+    ta_qmi.te \
+    thermanager.te \
+    timekeep.te \
+    file_contexts \
+    property_contexts \
+    service_contexts

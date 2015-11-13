@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, The Linux Foundation. All rights reserved.
+ * Copyright (c) 2013-2014, The Linux Foundation. All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -133,7 +133,22 @@
 #define EQ_BAND_BOOST	5
 #define EQ_BAND_CUT	6
 
+#define SOFT_VOLUME_MODULE		0x00006000
+#define SOFT_VOLUME_ENABLE		0x00006001
+#define SOFT_VOLUME_GAIN_2CH		0x00006002
+#define SOFT_VOLUME_GAIN_MASTER		0x00006003
+#define SOFT_VOLUME_ENABLE_PARAM_LEN		1
+#define SOFT_VOLUME_GAIN_2CH_PARAM_LEN		2
+#define SOFT_VOLUME_GAIN_MASTER_PARAM_LEN	1
 
+#define SOFT_VOLUME2_MODULE		0x00007000
+#define SOFT_VOLUME2_ENABLE		0x00007001
+#define SOFT_VOLUME2_GAIN_2CH		0x00007002
+#define SOFT_VOLUME2_GAIN_MASTER	0x00007003
+#define SOFT_VOLUME2_ENABLE_PARAM_LEN		SOFT_VOLUME_ENABLE_PARAM_LEN
+#define SOFT_VOLUME2_GAIN_2CH_PARAM_LEN		SOFT_VOLUME_GAIN_2CH_PARAM_LEN
+#define SOFT_VOLUME2_GAIN_MASTER_PARAM_LEN	\
+					SOFT_VOLUME_GAIN_MASTER_PARAM_LEN
 
 #define COMMAND_PAYLOAD_LEN	3
 #define COMMAND_PAYLOAD_SZ	(COMMAND_PAYLOAD_LEN * sizeof(uint32_t))
@@ -278,6 +293,29 @@ struct eq_params {
 	struct eq_per_band_freq_range_t per_band_freq_range[MAX_EQ_BANDS];
 	uint32_t band_index;
 	uint32_t freq_millihertz;
+};
+
+#define SOFT_VOLUME_ENABLE_PARAM_SZ		\
+			(SOFT_VOLUME_ENABLE_PARAM_LEN*sizeof(uint32_t))
+#define SOFT_VOLUME_GAIN_MASTER_PARAM_SZ	\
+			(SOFT_VOLUME_GAIN_MASTER_PARAM_LEN*sizeof(uint32_t))
+#define SOFT_VOLUME_GAIN_2CH_PARAM_SZ		\
+			(SOFT_VOLUME_GAIN_2CH_PARAM_LEN*sizeof(uint16_t))
+struct soft_volume_params {
+	uint32_t device;
+	uint32_t enable_flag;
+	uint32_t master_gain;
+	uint32_t left_gain;
+	uint32_t right_gain;
+};
+
+struct msm_nt_eff_all_config {
+	struct bass_boost_params bass_boost;
+	struct virtualizer_params virtualizer;
+	struct reverb_params reverb;
+	struct eq_params equalizer;
+	struct soft_volume_params saplus_vol;
+	struct soft_volume_params topo_switch_vol;
 };
 
 #endif /*_MSM_AUDIO_EFFECTS_H*/

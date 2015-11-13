@@ -12,24 +12,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+SONY_ROOT = device/sony/shinano-common/rootdir
+
 SOMC_PLATFORM := shinano
 
 DEVICE_PACKAGE_OVERLAYS += \
     device/sony/shinano-common/overlay
 
-SONY_ROOT = device/sony/shinano-common/rootdir
 PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/init.recovery.shinano.rc:root/init.recovery.shinano.rc \
     $(SONY_ROOT)/init.shinano.rc:root/init.shinano.rc \
     $(SONY_ROOT)/init.shinano.usb.rc:root/init.shinano.usb.rc \
     $(SONY_ROOT)/init.shinano.pwr.rc:root/init.shinano.pwr.rc \
     $(SONY_ROOT)/fstab.shinano:root/fstab.shinano \
-    $(SONY_ROOT)/twrp.fstab:recovery/root/etc/twrp.fstab \
     $(SONY_ROOT)/ueventd.shinano.rc:root/ueventd.shinano.rc \
     $(SONY_ROOT)/system/usr/idc/max1187x_touchscreen_0.idc:system/usr/idc/max1187x_touchscreen_0.idc \
     $(SONY_ROOT)/system/usr/idc/clearpad.idc:system/usr/idc/clearpad.idc \
     $(SONY_ROOT)/system/etc/bluetooth/bt_vendor.conf:system/etc/bluetooth/bt_vendor.conf \
     $(SONY_ROOT)/system/etc/sec_config:system/etc/sec_config \
+    $(SONY_ROOT)/system/etc/sensors_settings:system/etc/sensors_settings \
     $(SONY_ROOT)/system/etc/gps.conf:system/etc/gps.conf
 
 PRODUCT_COPY_FILES += \
@@ -37,9 +38,16 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.camera.flash-autofocus.xml:system/etc/permissions/android.hardware.camera.flash-autofocus.xml \
     frameworks/native/data/etc/android.hardware.camera.front.xml:system/etc/permissions/android.hardware.camera.front.xml \
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
-    frameworks/native/data/etc/android.hardware.telephony.cdma.xml:system/etc/permissions/android.hardware.telephony.cdma.xml \
     frameworks/native/data/etc/android.hardware.location.gps.xml:system/etc/permissions/android.hardware.location.gps.xml \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:system/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml \
+    frameworks/native/data/etc/android.hardware.sensor.barometer.xml:system/etc/permissions/android.hardware.sensor.barometer.xml \
+    frameworks/native/data/etc/android.hardware.sensor.gyroscope.xml:system/etc/permissions/android.hardware.sensor.gyroscope.xml \
+    frameworks/native/data/etc/android.hardware.sensor.accelerometer.xml:system/etc/permissions/android.hardware.sensor.accelerometer.xml \
+    frameworks/native/data/etc/android.hardware.sensor.compass.xml:system/etc/permissions/android.hardware.sensor.compass.xml \
+    frameworks/native/data/etc/android.hardware.sensor.light.xml:system/etc/permissions/android.hardware.sensor.light.xml \
+    frameworks/native/data/etc/android.hardware.sensor.proximity.xml:system/etc/permissions/android.hardware.sensor.proximity.xml \
+    frameworks/native/data/etc/android.hardware.sensor.stepcounter.xml:system/etc/permissions/android.hardware.sensor.stepcounter.xml \
+    frameworks/native/data/etc/android.hardware.sensor.stepdetector.xml:system/etc/permissions/android.hardware.sensor.stepdetector.xml \
     frameworks/native/data/etc/android.hardware.wifi.xml:system/etc/permissions/android.hardware.wifi.xml \
     frameworks/native/data/etc/android.hardware.wifi.direct.xml:system/etc/permissions/android.hardware.wifi.direct.xml \
     frameworks/native/data/etc/android.software.sip.voip.xml:system/etc/permissions/android.software.sip.voip.xml \
@@ -49,9 +57,8 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.bluetooth_le.xml:system/etc/permissions/android.hardware.bluetooth_le.xml
 
 PRODUCT_COPY_FILES += \
-    $(SONY_ROOT)/system/etc/audio_effects.conf:system/etc/audio_effects.conf \
+    $(SONY_ROOT)/system/etc/audio_effects.conf:system/vendor/etc/audio_effects.conf \
     $(SONY_ROOT)/system/etc/audio_policy.conf:system/etc/audio_policy.conf \
-    $(SONY_ROOT)/system/etc/mixer_paths.xml:system/etc/mixer_paths.xml \
     $(SONY_ROOT)/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
     $(SONY_ROOT)/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
     $(SONY_ROOT)/system/etc/audio_platform_info.xml:system/etc/audio_platform_info.xml \
@@ -61,7 +68,6 @@ PRODUCT_COPY_FILES += \
 
 # NFC
 PRODUCT_COPY_FILES += \
-    $(SONY_ROOT)/system/etc/libnfc-nxp.conf:system/etc/libnfc-nxp.conf \
     $(SONY_ROOT)/system/etc/nfcee_access.xml:system/etc/nfcee_access.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
@@ -73,11 +79,7 @@ PRODUCT_COPY_FILES += \
     $(SONY_ROOT)/system/usr/keylayout/mhl-rcp.kl:system/usr/keylayout/mhl-rcp.kl \
     $(SONY_ROOT)/system/usr/keylayout/msm8974-taiko-mtp-snd-card_Button_Jack.kl:system/usr/keylayout/msm8974-taiko-mtp-snd-card_Button_Jack.kl
 
-#Bootimg tools
-PRODUCT_PACKAGES += \
-    extract_elf_ramdisk
-
-#Audio
+# Audio
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.primary.msm8974 \
@@ -90,7 +92,7 @@ PRODUCT_PACKAGES += \
     libaudioalsa \
     libdiag
 
-# for audio.primary.msm8974
+# For audio.primary.msm8974
 PRODUCT_PACKAGES += \
     libtinyalsa \
     libtinycompress \
@@ -105,20 +107,22 @@ PRODUCT_PACKAGES += \
     libqcomvoiceprocessingdescriptors \
     libqcompostprocbundle
 
-#GFX
+# GFX
 PRODUCT_PACKAGES += \
-    gralloc.msm8974 \
     copybit.msm8974 \
+    gralloc.msm8974 \
     hwcomposer.msm8974 \
     memtrack.msm8974 \
-    libgenlock \
     libqdutils \
     libqdMetaData
 
 PRODUCT_PACKAGES += \
     libion
 
-#OMX
+PRODUCT_PACKAGES += \
+    libstlport
+
+# OMX
 PRODUCT_PACKAGES += \
     libc2dcolorconvert \
     libstagefrighthw \
@@ -128,25 +132,27 @@ PRODUCT_PACKAGES += \
     libOmxVdecHevc \
     libOmxVenc
 
+# Lights
 PRODUCT_PACKAGES += \
     lights.shinano
 
-# NFC packages
+# NFC
 PRODUCT_PACKAGES += \
     com.android.nfc_extras \
     NfcNci \
     Tag \
     nfc_nci.pn54x.default
 
-#GPS
+# GPS
 PRODUCT_PACKAGES += \
     libloc_api_v02 \
     libloc_adapter \
+    libloc_core \
     libloc_eng \
     libgps.utils \
     gps.msm8974
 
-#WLAN
+# WLAN
 PRODUCT_PACKAGES += \
     p2p_supplicant.conf \
     gsm_domains.conf \
@@ -156,53 +162,65 @@ PRODUCT_PACKAGES += \
     wpa_supplicant \
     wpa_supplicant.conf
 
+
+#CAMERA
+PRODUCT_PACKAGES += \
+    libmmcamera_interface \
+    libmmjpeg_interface \
+    libqomx_core \
+    camera.msm8974
+
 PRODUCT_PACKAGES += \
     keystore.msm8974
 
+# Misc
 PRODUCT_PACKAGES += \
     libmiscta \
     libta \
     tad_static \
     ta_qmi_service
 
+# OSS
 PRODUCT_PACKAGES += \
     timekeep \
     TimeKeep \
     thermanager \
-    addrsetup
+    macaddrsetup
 
 PRODUCT_PACKAGES += \
     rmt_storage
 
-#Charger
+# Charger
 PRODUCT_PACKAGES += \
     charger_res_images
 
 PRODUCT_PACKAGES += \
-    librs_jni \
-    com.android.future.usb.accessory
-
-PRODUCT_PACKAGES += \
-    Dialer \
-    Email \
-    Exchange2 \
     InCallUI \
     Launcher3
 
-# Filesystem management tools
 PRODUCT_PACKAGES += \
-    e2fsck
-
-PRODUCT_TAGS += dalvik.gc.type-precise
+    libemoji
 
 # APN list
-PRODUCT_COPY_FILES += device/sample/etc/apns-full-conf.xml:system/etc/apns-conf.xml
+PRODUCT_COPY_FILES += \
+    device/sample/etc/apns-full-conf.xml:system/etc/apns-conf.xml
 
+# Keyguard
 PRODUCT_PROPERTY_OVERRIDES += \
     keyguard.no_require_sim=true
 
-# Platform specific default properties
-#
-PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
-    persist.sys.usb.config=mtp
+# ART
+PRODUCT_PROPERTY_OVERRIDES += \
+    dalvik.vm.dex2oat-filter=speed \
+    dalvik.vm.image-dex2oat-filter=speed
 
+# ART
+PRODUCT_DEX_PREOPT_DEFAULT_FLAGS := \
+    --compiler-filter=speed
+
+$(call add-product-dex-preopt-module-config,services,--compiler-filter=speed)
+
+# Platform specific default properties
+PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
+    persist.sys.usb.config=mtp \
+    persist.data.qmi.adb_logmask=0

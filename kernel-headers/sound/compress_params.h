@@ -51,6 +51,8 @@
 #ifndef __SND_COMPRESS_PARAMS_H
 #define __SND_COMPRESS_PARAMS_H
 
+#include <linux/types.h>
+
 /* AUDIO CODECS SUPPORTED */
 #define MAX_NUM_CODECS 32
 #define MAX_NUM_CODEC_DESCRIPTORS 32
@@ -79,19 +81,18 @@
 #define SND_AUDIOCODEC_IEC61937              ((__u32) 0x0000000B)
 #define SND_AUDIOCODEC_G723_1                ((__u32) 0x0000000C)
 #define SND_AUDIOCODEC_G729                  ((__u32) 0x0000000D)
-#define SND_AUDIOCODEC_AC3                   ((__u32) 0x0000000E)
-#define SND_AUDIOCODEC_DTS                   ((__u32) 0x0000000F)
-#define SND_AUDIOCODEC_AC3_PASS_THROUGH      ((__u32) 0x00000010)
-#define SND_AUDIOCODEC_WMA_PRO               ((__u32) 0x00000011)
-#define SND_AUDIOCODEC_DTS_PASS_THROUGH      ((__u32) 0x00000012)
-#define SND_AUDIOCODEC_DTS_LBR               ((__u32) 0x00000013)
-#define SND_AUDIOCODEC_DTS_TRANSCODE_LOOPBACK ((__u32) 0x00000014)
-#define SND_AUDIOCODEC_PASS_THROUGH          ((__u32) 0x00000015)
-#define SND_AUDIOCODEC_MP2                   ((__u32) 0x00000016)
-#define SND_AUDIOCODEC_DTS_LBR_PASS_THROUGH  ((__u32) 0x00000017)
+#define SND_AUDIOCODEC_DTS_PASS_THROUGH      ((__u32) 0x0000000E)
+#define SND_AUDIOCODEC_DTS_LBR               ((__u32) 0x0000000F)
+#define SND_AUDIOCODEC_DTS_TRANSCODE_LOOPBACK ((__u32) 0x00000010)
+#define SND_AUDIOCODEC_PASS_THROUGH          ((__u32) 0x00000011)
+#define SND_AUDIOCODEC_MP2                   ((__u32) 0x00000012)
+#define SND_AUDIOCODEC_DTS_LBR_PASS_THROUGH  ((__u32) 0x00000013)
+#define SND_AUDIOCODEC_AC3                   ((__u32) 0x00000014)
+#define SND_AUDIOCODEC_AC3_PASS_THROUGH      ((__u32) 0x00000015)
+#define SND_AUDIOCODEC_WMA_PRO               ((__u32) 0x00000016)
+#define SND_AUDIOCODEC_DTS             	     ((__u32) 0x00000017)
 #define SND_AUDIOCODEC_EAC3                  ((__u32) 0x00000018)
-#define SND_AUDIOCODEC_MAX  SND_AUDIOCODEC_EAC3
-
+#define SND_AUDIOCODEC_MAX                   SND_AUDIOCODEC_EAC3
 /*
  * Profile and modes are listed with bit masks. This allows for a
  * more compact representation of fields that will not evolve
@@ -336,15 +337,17 @@ struct snd_enc_generic {
 	__u32 bw;	/* encoder bandwidth */
 	__s32 reserved[15];
 };
-struct snd_dec_dts {
-	__u32 modelIdLength;
-	__u8 *modelId;
-};
 struct snd_dec_ddp {
 	__u32 params_length;
-	__u8 *params;
 	__u32 params_id[18];
 	__u32 params_value[18];
+};
+struct snd_dec_flac {
+	__u16 sample_size;
+	__u16 min_blk_size;
+	__u16 max_blk_size;
+	__u16 min_frame_size;
+	__u16 max_frame_size;
 };
 union snd_codec_options {
 	struct snd_enc_wma wma;
@@ -352,8 +355,8 @@ union snd_codec_options {
 	struct snd_enc_real real;
 	struct snd_enc_flac flac;
 	struct snd_enc_generic generic;
-	struct snd_dec_dts dts;
 	struct snd_dec_ddp ddp;
+	struct snd_dec_flac flac_dec;
 };
 
 /** struct snd_codec_desc - description of codec capabilities
@@ -427,8 +430,7 @@ struct snd_codec {
 	__u32 ch_mode;
 	__u32 format;
 	__u32 align;
-	__u32 transcode_dts;
-	struct snd_dec_dts dts;
+	__u32 compr_passthr;
 	union snd_codec_options options;
 	__u32 reserved[3];
 };
